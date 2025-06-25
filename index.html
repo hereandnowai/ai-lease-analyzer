@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Lease Analyzer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="https://raw.githubusercontent.com/hereandnowai/images/refs/heads/main/logos/favicon-logo-with-name.png" type="image/png">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif; /* A common, clean sans-serif font */
+    }
+    /* Adding a fallback font and applying Tailwind's anti-aliasing */
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    @media print {
+      body {
+        margin: 10mm;
+        padding: 0;
+        font-size: 10pt;
+        background-color: #fff !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      /* Hide non-content elements */
+      header,
+      footer,
+      #ai-assistant-toggle-button, /* Specific ID for the toggle */
+      .lease-data-display-actions, /* Buttons at the bottom of the report */
+      .ai-legal-assistant-form,    /* Form to ask AI in lease display */
+      .internal-notes-textarea,    /* Textarea for internal notes */
+      .section-card-summary-toggle /* The expand/collapse arrow in section cards */
+      {
+        display: none !important;
+      }
+
+      /* General styling for print */
+      .container { max-width: none !important; padding: 0 !important; }
+      .shadow-xl, .shadow-lg, .shadow-md, .shadow { box-shadow: none !important; }
+      .rounded-lg, .rounded-md, .rounded-full { border-radius: 0 !important; }
+      .border, .border-b, .border-gray-200,
+      .section-card-summary { /* Also targets summary border */
+          border-color: #ccc !important;
+      }
+      details { page-break-inside: avoid; }
+      details summary { list-style: none; } /* Hide default disclosure triangle */
+      details summary::-webkit-details-marker { display: none; } /* Hide triangle in WebKit */
+
+
+      /* Ensure background colors print for specific elements */
+      .ai-analysis-note,
+      .risk-score-pill,
+      .flagged-issue-item,
+      .policy-deviation-item,
+      .no-issues-item,
+      .no-deviations-item,
+      .section-card-summary {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      /* Specific element styling for print */
+      .section-card-summary {
+        background-color: #f0f0f0 !important;
+        padding: 8px !important;
+        border-bottom: 1px solid #ccc !important;
+      }
+      .section-card-summary h3 {
+        font-size: 14pt !important;
+        color: #000 !important;
+      }
+      .section-card-content {
+        padding: 8px !important;
+      }
+      
+      .ai-analysis-note {
+        background-color: #FFFACD !important; /* LemonChiffon for AI note background */
+        color: #333 !important;
+        border: 1px solid #DADADA !important;
+        padding: 6px !important;
+      }
+      .ai-analysis-note strong {
+         color: #000 !important;
+      }
+
+      .risk-score-pill {
+        color: #fff !important; /* Text already white, background is dynamic from JS */
+        padding: 3px 8px !important;
+        border-radius: 4px !important;
+        display: inline-block !important; /* Ensure it renders properly */
+        font-weight: bold;
+      }
+
+      .flagged-issue-item, .policy-deviation-item {
+        background-color: #FFF3CD !important; /* Light yellow for issues */
+        border: 1px solid #FFEEBA !important;
+        color: #856404 !important; /* Dark yellow/brown text */
+        padding: 6px !important;
+        margin-bottom: 4px !important;
+      }
+      .flagged-issue-item svg, .policy-deviation-item svg {
+        color: #856404 !important;
+      }
+      .flagged-issue-item span, .policy-deviation-item span {
+         color: #856404 !important;
+      }
+
+      .no-issues-item, .no-deviations-item {
+        background-color: #D4EDDA !important; /* Light green for no issues */
+        border: 1px solid #C3E6CB !important;
+        color: #155724 !important; /* Dark green text */
+        padding: 6px !important;
+      }
+       .no-issues-item svg, .no-deviations-item svg {
+        color: #155724 !important;
+      }
+      .no-issues-item span, .no-deviations-item span {
+         color: #155724 !important;
+      }
+      
+      /* Default all text to black for readability, unless overridden by more specific rules */
+      dt, dd, p, span, li, h4, label { /* Exclude h3 as it's handled in .section-card-summary h3 */
+        color: #000 !important;
+      }
+       /* Ensure links are black and underlined for print */
+      a, a:visited {
+        color: #000 !important;
+        text-decoration: underline !important;
+      }
+      /* Optional: show URL for external links */
+      /* a[href^="http"]:after { content: " (" attr(href) ")"; font-size: 9pt; } */
+
+      /* Hide summary buttons within AI-Generated Summary section */
+      .ai-summary-actions button {
+          display: none !important;
+      }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.6.0",
+    "jspdf": "https://esm.sh/jspdf@^2.5.1",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-gray-100">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

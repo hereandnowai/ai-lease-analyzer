@@ -1,0 +1,8 @@
+{
+  "name": "AI Lease Analyzer",
+  "description": "An AI-powered application to analyze lease documents, extract key information, and identify potential issues.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "prompt": ""
+}
